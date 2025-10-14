@@ -1,4 +1,4 @@
-import { Project, TeamMember, Task, CalendarEvent, Client, IncomeTransaction, ExpenseTransaction, Invoice, InvoiceLineItem, InvoiceTemplate, Conversation, ChatMessage, Note } from '../types';
+import { Project, TeamMember, Task, CalendarEvent, Client, IncomeTransaction, ExpenseTransaction, Invoice, InvoiceTemplate, Conversation, Note, ProjectFile } from '../types';
 
 export const mockTeamMembers: TeamMember[] = [
   {
@@ -7,6 +7,7 @@ export const mockTeamMembers: TeamMember[] = [
     role: 'Creative Director',
     avatar: 'https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=150&h=150&fit=crop&crop=face',
     email: 'sarah@studio.com',
+    phone: '555-0101',
     status: 'online',
     department: 'Design'
   },
@@ -16,6 +17,7 @@ export const mockTeamMembers: TeamMember[] = [
     role: 'Lead Developer',
     avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face',
     email: 'marcus@studio.com',
+    phone: '555-0102',
     status: 'online',
     department: 'Development'
   },
@@ -25,6 +27,7 @@ export const mockTeamMembers: TeamMember[] = [
     role: 'UX Designer',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face',
     email: 'emma@studio.com',
+    phone: '555-0103',
     status: 'away',
     department: 'Design'
   },
@@ -34,6 +37,7 @@ export const mockTeamMembers: TeamMember[] = [
     role: 'Project Manager',
     avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face',
     email: 'james@studio.com',
+    phone: '555-0104',
     status: 'online',
     department: 'Management'
   },
@@ -43,6 +47,7 @@ export const mockTeamMembers: TeamMember[] = [
     role: 'Senior Designer',
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face',
     email: 'olivia@studio.com',
+    phone: '555-0105',
     status: 'online',
     department: 'Design'
   },
@@ -52,6 +57,7 @@ export const mockTeamMembers: TeamMember[] = [
     role: 'Frontend Developer',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
     email: 'david@studio.com',
+    phone: '555-0106',
     status: 'away',
     department: 'Development'
   },
@@ -59,8 +65,9 @@ export const mockTeamMembers: TeamMember[] = [
     id: '7',
     name: 'Lisa Zhang',
     role: 'Product Designer',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b9f72136?w=150&h=150&fit=crop&crop=face',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face',
     email: 'lisa@studio.com',
+    phone: '555-0107',
     status: 'online',
     department: 'Design'
   },
@@ -70,6 +77,7 @@ export const mockTeamMembers: TeamMember[] = [
     role: 'Backend Developer',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
     email: 'alex@studio.com',
+    phone: '555-0108',
     status: 'offline',
     department: 'Development'
   }
@@ -82,7 +90,7 @@ export const mockProjects: Project[] = [
     description: 'Complete brand identity redesign for premium resort chain',
     status: 'active',
     client: 'Ocean Vista Resorts',
-    team: [mockTeamMembers[0], mockTeamMembers[2]],
+    team: [mockTeamMembers[0], mockTeamMembers[2], mockTeamMembers[4]],
     progress: 65,
     deadline: '2025-03-15',
     budget: 85000,
@@ -95,7 +103,7 @@ export const mockProjects: Project[] = [
     description: 'User-friendly mobile banking application for modern users',
     status: 'active',
     client: 'NextGen Financial',
-    team: [mockTeamMembers[1], mockTeamMembers[3]],
+    team: [mockTeamMembers[1], mockTeamMembers[3], mockTeamMembers[6]],
     progress: 45,
     deadline: '2025-04-20',
     budget: 120000,
@@ -108,7 +116,7 @@ export const mockProjects: Project[] = [
     description: 'Custom e-commerce solution for fashion retailer',
     status: 'completed',
     client: 'Style Collective',
-    team: [mockTeamMembers[1], mockTeamMembers[2]],
+    team: [mockTeamMembers[1], mockTeamMembers[5], mockTeamMembers[7]],
     progress: 100,
     deadline: '2025-01-30',
     budget: 95000,
@@ -430,4 +438,61 @@ export const mockConversations: Conversation[] = [
       { id: 'msg-7', sender: mockTeamMembers[0], content: 'Of course, send them over!', timestamp: '2025-03-12T11:01:00.000Z' },
     ],
   },
+];
+
+export const mockFiles: ProjectFile[] = [
+  {
+    id: 'file-1',
+    name: 'Brand_Guidelines_v2.pdf',
+    type: 'application/pdf',
+    size: 5242880, // 5MB
+    url: '#',
+    uploadedBy: mockTeamMembers[0],
+    uploadedAt: '2025-03-10T10:00:00Z',
+    version: 2,
+    projectId: '1'
+  },
+  {
+    id: 'file-2',
+    name: 'Homepage_Mockup_Desktop.fig',
+    type: 'image/figma',
+    size: 12582912, // 12MB
+    url: '#',
+    uploadedBy: mockTeamMembers[2],
+    uploadedAt: '2025-03-09T14:30:00Z',
+    version: 1,
+    projectId: '4'
+  },
+  {
+    id: 'file-3',
+    name: 'User_Flow_Diagram.png',
+    type: 'image/png',
+    size: 1048576, // 1MB
+    url: '#',
+    uploadedBy: mockTeamMembers[6],
+    uploadedAt: '2025-03-08T11:00:00Z',
+    version: 3,
+    projectId: '2'
+  },
+  {
+    id: 'file-4',
+    name: 'Q1_Marketing_Assets.zip',
+    type: 'application/zip',
+    size: 26214400, // 25MB
+    url: '#',
+    uploadedBy: mockTeamMembers[3],
+    uploadedAt: '2025-03-07T16:45:00Z',
+    version: 1,
+  },
+    {
+    id: 'file-5',
+    name: 'API_Specification.docx',
+    type: 'application/msword',
+    size: 786432, // 768KB
+    url: '#',
+    uploadedBy: mockTeamMembers[1],
+    uploadedAt: '2025-03-06T09:20:00Z',
+    version: 1,
+    projectId: '3'
+  }
 ];

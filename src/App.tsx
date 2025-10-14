@@ -13,12 +13,15 @@ import { InvoicingView } from './components/Invoicing/InvoicingView';
 import { InvoiceTemplatesView } from './components/Invoicing/InvoiceTemplatesView';
 import { ChatView } from './components/Chat/ChatView';
 import { CalendarView } from './components/Calendar/CalendarView';
+import { FilesView } from './components/Files/FilesView';
+import { SettingsView } from './components/Settings/SettingsView';
 import { ProjectFormModal } from './components/Projects/ProjectFormModal';
 import { TaskFormModal } from './components/Tasks/TaskFormModal';
 import { TeamMemberFormModal } from './components/Team/TeamMemberFormModal';
+import { FileUploadModal } from './components/Files/FileUploadModal';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { Project, Task, TeamMember } from './types';
-import { mockProjects, mockTeamMembers, mockTasks } from './data/mockData';
+import { Project, Task, TeamMember, ProjectFile } from './types';
+import { mockProjects, mockTeamMembers, mockTasks, mockFiles } from './data/mockData';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -38,139 +41,89 @@ const App: React.FC = () => {
   const [isTeamMemberModalOpen, setIsTeamMemberModalOpen] = useState(false);
   const [editingTeamMember, setEditingTeamMember] = useState<TeamMember | null>(null);
 
+  const [files, setFiles] = useLocalStorage<ProjectFile[]>('files', mockFiles);
+  const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
 
-  const currentUser = mockTeamMembers.find(m => m.id === '1')!;
+  const currentUser = teamMembers.find(m => m.id === '1')!;
 
+  // Project Handlers
   const handleOpenNewProjectModal = () => {
     setEditingProject(null);
     setIsProjectModalOpen(true);
   };
-
   const handleOpenEditProjectModal = (project: Project) => {
     setEditingProject(project);
     setIsProjectModalOpen(true);
   };
-
-  const handleCloseProjectModal = () => {
-    setIsProjectModalOpen(false);
-    setEditingProject(null);
-  };
-
+  const handleCloseProjectModal = () => setIsProjectModalOpen(false);
   const handleSaveProject = (projectToSave: Project) => {
-    setProjects(prevProjects => {
-      const exists = prevProjects.some(p => p.id === projectToSave.id);
-      if (exists) {
-        return prevProjects.map(p => (p.id === projectToSave.id ? projectToSave : p));
-      }
-      return [projectToSave, ...prevProjects];
-    });
+    setProjects(prev => prev.some(p => p.id === projectToSave.id) ? prev.map(p => p.id === projectToSave.id ? projectToSave : p) : [projectToSave, ...prev]);
     handleCloseProjectModal();
   };
 
+  // Task Handlers
   const handleOpenNewTaskModal = (status: 'todo' | 'in-progress' | 'review' | 'completed' = 'todo') => {
     setEditingTask(null);
     setDefaultTaskStatus(status);
     setIsTaskModalOpen(true);
   };
-
   const handleOpenEditTaskModal = (task: Task) => {
     setEditingTask(task);
     setIsTaskModalOpen(true);
   };
-
-  const handleCloseTaskModal = () => {
-    setIsTaskModalOpen(false);
-    setEditingTask(null);
-  };
-
+  const handleCloseTaskModal = () => setIsTaskModalOpen(false);
   const handleSaveTask = (taskToSave: Task) => {
-    setTasks(prevTasks => {
-      const exists = prevTasks.some(t => t.id === taskToSave.id);
-      if (exists) {
-        return prevTasks.map(t => (t.id === taskToSave.id ? taskToSave : t));
-      }
-      return [taskToSave, ...prevTasks];
-    });
+    setTasks(prev => prev.some(t => t.id === taskToSave.id) ? prev.map(t => t.id === taskToSave.id ? taskToSave : t) : [taskToSave, ...prev]);
     handleCloseTaskModal();
   };
-  
   const handleTaskStatusChange = (taskId: string, newStatus: 'todo' | 'in-progress' | 'review' | 'completed') => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId ? { ...task, status: newStatus } : task
-      )
-    );
+    setTasks(prev => prev.map(task => task.id === taskId ? { ...task, status: newStatus } : task));
   };
 
+  // Team Member Handlers
   const handleOpenNewTeamMemberModal = () => {
     setEditingTeamMember(null);
     setIsTeamMemberModalOpen(true);
   };
-
   const handleOpenEditTeamMemberModal = (member: TeamMember) => {
     setEditingTeamMember(member);
     setIsTeamMemberModalOpen(true);
   };
-
-  const handleCloseTeamMemberModal = () => {
-    setIsTeamMemberModalOpen(false);
-    setEditingTeamMember(null);
+  const handleCloseTeamMemberModal = () => setIsTeamMemberModalOpen(false);
+  const handleSaveTeamMember = (memberToSave: TeamMember) => {
+    setTeamMembers(prev => prev.some(m => m.id === memberToSave.id) ? prev.map(m => m.id === memberToSave.id ? memberToSave : m) : [memberToSave, ...prev]);
+    handleCloseTeamMemberModal();
+  };
+  const handleUpdateCurrentUser = (user: TeamMember) => {
+    handleSaveTeamMember(user);
   };
 
-  const handleSaveTeamMember = (memberToSave: TeamMember) => {
-    setTeamMembers(prevMembers => {
-      const exists = prevMembers.some(m => m.id === memberToSave.id);
-      if (exists) {
-        return prevMembers.map(m => (m.id === memberToSave.id ? memberToSave : m));
-      }
-      return [memberToSave, ...prevMembers];
-    });
-    handleCloseTeamMemberModal();
+  // File Handlers
+  const handleOpenFileUploadModal = () => setIsFileUploadModalOpen(true);
+  const handleCloseFileUploadModal = () => setIsFileUploadModalOpen(false);
+  const handleSaveFile = (fileToSave: ProjectFile) => {
+    setFiles(prev => [fileToSave, ...prev]);
+    handleCloseFileUploadModal();
+  };
+  const handleDeleteFile = (fileId: string) => {
+    setFiles(prev => prev.filter(f => f.id !== fileId));
   };
 
   const renderContent = () => {
     switch (activeView) {
-      case 'dashboard':
-        return <Dashboard projects={projects} tasks={tasks} />;
-      case 'projects':
-        return <ProjectList 
-                  projects={projects} 
-                  onCreateNew={handleOpenNewProjectModal} 
-                  onEdit={handleOpenEditProjectModal} 
-                />;
-      case 'tasks':
-        return <TaskBoard 
-                  tasks={tasks}
-                  teamMembers={teamMembers}
-                  projects={projects}
-                  onEditTask={handleOpenEditTaskModal}
-                  onCreateNewTask={handleOpenNewTaskModal}
-                  onTaskStatusChange={handleTaskStatusChange}
-                />;
-      case 'team':
-        return <TeamDirectory 
-                  teamMembers={teamMembers}
-                  onAddMember={handleOpenNewTeamMemberModal}
-                  onEditMember={handleOpenEditTeamMemberModal}
-                />;
-      case 'chat':
-        return <ChatView currentUser={currentUser} />;
-      case 'files':
-        return <div className="p-6"><h1 className="text-header font-semibold text-charcoal-900 dark:text-white">Files & Resources</h1><p className="text-charcoal-600 dark:text-gray-400 mt-2">Coming soon...</p></div>;
-      case 'calendar':
-        return <CalendarView />;
-      case 'client':
-        return <ClientView />;
-      case 'finance':
-        return <FinanceView />;
-      case 'invoicing':
-        return <InvoicingView />;
-      case 'invoice-templates':
-        return <InvoiceTemplatesView />;
-      case 'settings':
-        return <div className="p-6"><h1 className="text-header font-semibold text-charcoal-900 dark:text-white">Settings</h1><p className="text-charcoal-600 dark:text-gray-400 mt-2">Coming soon...</p></div>;
-      default:
-        return <Dashboard projects={projects} tasks={tasks} />;
+      case 'dashboard': return <Dashboard projects={projects} tasks={tasks} />;
+      case 'projects': return <ProjectList projects={projects} onCreateNew={handleOpenNewProjectModal} onEdit={handleOpenEditProjectModal} />;
+      case 'tasks': return <TaskBoard tasks={tasks} teamMembers={teamMembers} projects={projects} onEditTask={handleOpenEditTaskModal} onCreateNewTask={handleOpenNewTaskModal} onTaskStatusChange={handleTaskStatusChange} />;
+      case 'team': return <TeamDirectory teamMembers={teamMembers} onAddMember={handleOpenNewTeamMemberModal} onEditMember={handleOpenEditTeamMemberModal} />;
+      case 'chat': return <ChatView currentUser={currentUser} />;
+      case 'files': return <FilesView files={files} projects={projects} onCreateNew={handleOpenFileUploadModal} onDelete={handleDeleteFile} />;
+      case 'calendar': return <CalendarView />;
+      case 'client': return <ClientView />;
+      case 'finance': return <FinanceView />;
+      case 'invoicing': return <InvoicingView />;
+      case 'invoice-templates': return <InvoiceTemplatesView />;
+      case 'settings': return <SettingsView currentUser={currentUser} onUpdateUser={handleUpdateCurrentUser} />;
+      default: return <Dashboard projects={projects} tasks={tasks} />;
     }
   };
 
@@ -179,74 +132,30 @@ const App: React.FC = () => {
       <div className="min-h-screen bg-sand-50 dark:bg-dark-950 flex transition-colors duration-300">
         <AnimatePresence>
           {isMobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
           )}
         </AnimatePresence>
 
         <div className={`${isMobileMenuOpen ? 'fixed' : 'hidden'} lg:relative lg:block inset-y-0 left-0 z-50 lg:z-0`}>
-          <Sidebar
-            activeView={activeView}
-            onViewChange={(view) => {
-              setActiveView(view);
-              setIsMobileMenuOpen(false);
-            }}
-            isExpanded={sidebarExpanded}
-            onToggle={() => setSidebarExpanded(!sidebarExpanded)}
-          />
+          <Sidebar activeView={activeView} onViewChange={(view) => { setActiveView(view); setIsMobileMenuOpen(false); }} isExpanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <Header
-            onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            currentUser={currentUser}
-            onNewProjectClick={handleOpenNewProjectModal}
-          />
+          <Header onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} currentUser={currentUser} onNewProjectClick={handleOpenNewProjectModal} />
           
           <main className="flex-1 overflow-y-auto">
             <AnimatePresence mode="wait">
-              <motion.div
-                key={activeView}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="h-full"
-              >
+              <motion.div key={activeView} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="h-full">
                 {renderContent()}
               </motion.div>
             </AnimatePresence>
           </main>
         </div>
 
-        <ProjectFormModal
-          isOpen={isProjectModalOpen}
-          onClose={handleCloseProjectModal}
-          onSave={handleSaveProject}
-          project={editingProject}
-        />
-
-        <TaskFormModal
-          isOpen={isTaskModalOpen}
-          onClose={handleCloseTaskModal}
-          onSave={handleSaveTask}
-          task={editingTask}
-          projects={projects}
-          teamMembers={teamMembers}
-          defaultStatus={defaultTaskStatus}
-        />
-
-        <TeamMemberFormModal
-          isOpen={isTeamMemberModalOpen}
-          onClose={handleCloseTeamMemberModal}
-          onSave={handleSaveTeamMember}
-          member={editingTeamMember}
-        />
+        <ProjectFormModal isOpen={isProjectModalOpen} onClose={handleCloseProjectModal} onSave={handleSaveProject} project={editingProject} />
+        <TaskFormModal isOpen={isTaskModalOpen} onClose={handleCloseTaskModal} onSave={handleSaveTask} task={editingTask} projects={projects} teamMembers={teamMembers} defaultStatus={defaultTaskStatus} />
+        <TeamMemberFormModal isOpen={isTeamMemberModalOpen} onClose={handleCloseTeamMemberModal} onSave={handleSaveTeamMember} member={editingTeamMember} />
+        <FileUploadModal isOpen={isFileUploadModalOpen} onClose={handleCloseFileUploadModal} onSave={handleSaveFile} projects={projects} currentUser={currentUser} />
       </div>
     </ThemeProvider>
   );

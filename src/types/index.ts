@@ -22,7 +22,7 @@ export interface Task {
   dueDate: string;
   projectId: string;
   comments: Comment[];
-  attachments: File[];
+  attachments: ProjectFile[];
 }
 
 export interface TeamMember {
@@ -31,6 +31,7 @@ export interface TeamMember {
   role: string;
   avatar: string;
   email: string;
+  phone?: string;
   status: 'online' | 'offline' | 'away';
   department: string;
 }
@@ -59,7 +60,7 @@ export interface Comment {
   replies?: Comment[];
 }
 
-export interface File {
+export interface ProjectFile {
   id: string;
   name: string;
   type: string;
@@ -68,6 +69,7 @@ export interface File {
   uploadedBy: TeamMember;
   uploadedAt: string;
   version: number;
+  projectId?: string;
 }
 
 export interface CalendarEvent {

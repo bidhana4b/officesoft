@@ -1,9 +1,12 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MessageSquare, StickyNote, Send, Edit, Plus } from 'lucide-react';
+import { Search, MessageSquare, StickyNote, PlusCircle, MessageCircle } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { mockConversations, mockNotes } from '../../data/mockData';
+import { mockConversations, mockNotes, mockTeamMembers } from '../../data/mockData';
 import { Conversation, Note, ChatMessage, TeamMember } from '../../types';
+import { ChatWindow } from './ChatWindow';
+import { NoteEditor } from './NoteEditor';
+import { NewChatModal } from './NewChatModal';
 
 interface ChatViewProps {
   currentUser: TeamMember;
@@ -13,9 +16,11 @@ export const ChatView: React.FC<ChatViewProps> = ({ currentUser }) => {
   const [activeTab, setActiveTab] = useState<'chats' | 'notes'>('chats');
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
 
   const [conversations, setConversations] = useLocalStorage<Conversation[]>('conversations', mockConversations);
   const [notes, setNotes] = useLocalStorage<Note[]>('notes', mockNotes);
+  const [teamMembers] = useLocalStorage<TeamMember[]>('teamMembers', mockTeamMembers);
 
   const selectedItem = useMemo(() => {
     if (!selectedItemId) return null;
@@ -51,26 +56,53 @@ export const ChatView: React.FC<ChatViewProps> = ({ currentUser }) => {
     ));
   };
 
-  const handleUpdateNote = (content: string) => {
-    if (!selectedItemId || activeTab !== 'notes') return;
-
+  const handleUpdateNote = (updatedNote: Note) => {
     setNotes(prev => prev.map(n =>
-      n.id === selectedItemId ? { ...n, content, updatedAt: new Date().toISOString() } : n
+      n.id === updatedNote.id ? updatedNote : n
     ));
   };
+  
+  const handleDeleteNote = (noteId: string) => {
+    setNotes(prev => prev.filter(n => n.id !== noteId));
+    setSelectedItemId(null);
+  };
 
-  const handleCreateNew = () => {
-    if (activeTab === 'notes') {
-      const newNote: Note = {
+  const handleDeleteConversation = (convId: string) => {
+    setConversations(prev => prev.filter(c => c.id !== convId));
+    setSelectedItemId(null);
+  };
+
+  const handleCreateNewNote = () => {
+    const newNote: Note = {
+      id: crypto.randomUUID(),
+      title: 'New Note',
+      content: '',
+      updatedAt: new Date().toISOString(),
+    };
+    setNotes(prev => [newNote, ...prev]);
+    setActiveTab('notes');
+    setSelectedItemId(newNote.id);
+  };
+
+  const handleStartChat = (user: TeamMember) => {
+    setIsNewChatModalOpen(false);
+    // Check if a conversation with this user already exists
+    const existingConv = conversations.find(c => 
+      c.participants.length === 2 && c.participants.some(p => p.id === user.id)
+    );
+
+    if (existingConv) {
+      setSelectedItemId(existingConv.id);
+    } else {
+      const newConv: Conversation = {
         id: crypto.randomUUID(),
-        title: 'New Note',
-        content: '',
-        updatedAt: new Date().toISOString(),
+        participants: [currentUser, user],
+        messages: [],
       };
-      setNotes(prev => [newNote, ...prev]);
-      setSelectedItemId(newNote.id);
+      setConversations(prev => [newConv, ...prev]);
+      setSelectedItemId(newConv.id);
     }
-    // "New Chat" can be implemented with a user selection modal
+    setActiveTab('chats');
   };
 
   return (
@@ -100,6 +132,18 @@ export const ChatView: React.FC<ChatViewProps> = ({ currentUser }) => {
             </button>
           </div>
         </div>
+        <div className="p-2 border-b border-sand-200 dark:border-dark-600">
+          <div className="flex space-x-2">
+            <button onClick={() => setIsNewChatModalOpen(true)} className="w-1/2 text-center p-2 rounded-lg flex items-center justify-center space-x-2 transition-colors bg-sand-100 dark:bg-dark-700 hover:bg-sand-200 dark:hover:bg-dark-600">
+              <MessageCircle size={16} className="text-accent-teal" />
+              <span className="font-medium text-sm text-accent-teal">New Chat</span>
+            </button>
+            <button onClick={handleCreateNewNote} className="w-1/2 text-center p-2 rounded-lg flex items-center justify-center space-x-2 transition-colors bg-sand-100 dark:bg-dark-700 hover:bg-sand-200 dark:hover:bg-dark-600">
+              <PlusCircle size={16} className="text-accent-teal" />
+              <span className="font-medium text-sm text-accent-teal">New Note</span>
+            </button>
+          </div>
+        </div>
         <div className="flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
@@ -113,7 +157,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ currentUser }) => {
                         <img src={otherParticipant?.avatar} alt={otherParticipant?.name} className="w-10 h-10 rounded-full" />
                         <div className="flex-1 overflow-hidden">
                           <p className="font-medium text-charcoal-800 dark:text-gray-200 truncate">{otherParticipant?.name}</p>
-                          <p className="text-sm text-charcoal-500 dark:text-gray-400 truncate">{lastMessage?.content}</p>
+                          <p className="text-sm text-charcoal-500 dark:text-gray-400 truncate">{lastMessage ? `${lastMessage.sender.id === currentUser.id ? 'You: ' : ''}${lastMessage.content}` : 'No messages yet'}</p>
                         </div>
                       </button>
                     );
@@ -121,10 +165,6 @@ export const ChatView: React.FC<ChatViewProps> = ({ currentUser }) => {
                 </div>
               ) : (
                 <div className="p-2 space-y-1">
-                  <button onClick={handleCreateNew} className="w-full text-left p-3 mb-2 rounded-xl flex items-center justify-center space-x-2 transition-colors bg-sand-100 dark:bg-dark-700 hover:bg-sand-200 dark:hover:bg-dark-600">
-                    <Plus size={16} className="text-accent-teal" />
-                    <span className="font-medium text-accent-teal">New Note</span>
-                  </button>
                   {filteredNotes.map(note => (
                     <button key={note.id} onClick={() => setSelectedItemId(note.id)} className={`w-full text-left p-3 rounded-xl transition-colors ${selectedItemId === note.id ? 'bg-accent-teal/10 dark:bg-accent-teal/20' : 'hover:bg-sand-100 dark:hover:bg-dark-700'}`}>
                       <p className="font-medium text-charcoal-800 dark:text-gray-200 truncate">{note.title}</p>
@@ -150,97 +190,22 @@ export const ChatView: React.FC<ChatViewProps> = ({ currentUser }) => {
           )}
 
           {selectedItem && activeTab === 'chats' && (
-            <ChatWindow key={selectedItem.id} conversation={selectedItem as Conversation} currentUser={currentUser} onSendMessage={handleSendMessage} />
+            <ChatWindow key={selectedItem.id} conversation={selectedItem as Conversation} currentUser={currentUser} onSendMessage={handleSendMessage} onDelete={handleDeleteConversation} />
           )}
 
           {selectedItem && activeTab === 'notes' && (
-            <NoteEditor key={selectedItem.id} note={selectedItem as Note} onUpdateNote={handleUpdateNote} />
+            <NoteEditor key={selectedItem.id} note={selectedItem as Note} onUpdateNote={handleUpdateNote} onDelete={handleDeleteNote} />
           )}
         </AnimatePresence>
       </main>
+      
+      <NewChatModal
+        isOpen={isNewChatModalOpen}
+        onClose={() => setIsNewChatModalOpen(false)}
+        onSelectUser={handleStartChat}
+        teamMembers={teamMembers}
+        currentUser={currentUser}
+      />
     </div>
-  );
-};
-
-const ChatWindow: React.FC<{ conversation: Conversation, currentUser: TeamMember, onSendMessage: (content: string) => void }> = ({ conversation, currentUser, onSendMessage }) => {
-  const [message, setMessage] = useState('');
-  const otherParticipant = conversation.participants.find(p => p.id !== currentUser.id);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [conversation.messages]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (message.trim()) {
-      onSendMessage(message.trim());
-      setMessage('');
-    }
-  };
-
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col h-full">
-      <header className="p-4 border-b border-sand-200 dark:border-dark-600 flex items-center space-x-3 bg-white dark:bg-dark-800">
-        <img src={otherParticipant?.avatar} alt={otherParticipant?.name} className="w-10 h-10 rounded-full" />
-        <div>
-          <p className="font-semibold text-charcoal-900 dark:text-white">{otherParticipant?.name}</p>
-          <p className="text-sm text-green-500">Online</p>
-        </div>
-      </header>
-      <div className="flex-1 p-6 overflow-y-auto space-y-4">
-        {conversation.messages.map(msg => (
-          <div key={msg.id} className={`flex items-end gap-2 ${msg.sender.id === currentUser.id ? 'justify-end' : 'justify-start'}`}>
-            {msg.sender.id !== currentUser.id && <img src={msg.sender.avatar} alt={msg.sender.name} className="w-8 h-8 rounded-full" />}
-            <div className={`max-w-md p-3 rounded-2xl ${msg.sender.id === currentUser.id ? 'bg-accent-teal text-white rounded-br-none' : 'bg-white dark:bg-dark-700 rounded-bl-none'}`}>
-              <p>{msg.content}</p>
-            </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-      <form onSubmit={handleSubmit} className="p-4 bg-white dark:bg-dark-800 border-t border-sand-200 dark:border-dark-600">
-        <div className="relative">
-          <input
-            type="text"
-            value={message}
-            onChange={e => setMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="w-full pr-12 pl-4 py-3 bg-sand-100 dark:bg-dark-700 border-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-teal"
-          />
-          <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-accent-teal text-white rounded-lg hover:bg-accent-teal-dark transition-colors">
-            <Send size={20} />
-          </button>
-        </div>
-      </form>
-    </motion.div>
-  );
-};
-
-const NoteEditor: React.FC<{ note: Note, onUpdateNote: (content: string) => void }> = ({ note, onUpdateNote }) => {
-  const [content, setContent] = useState(note.content);
-  
-  const handleBlur = () => {
-    if (content !== note.content) {
-      onUpdateNote(content);
-    }
-  };
-
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col h-full">
-      <header className="p-4 border-b border-sand-200 dark:border-dark-600 flex items-center justify-between bg-white dark:bg-dark-800">
-        <h3 className="text-lg font-semibold text-charcoal-900 dark:text-white">{note.title}</h3>
-        <p className="text-sm text-charcoal-500 dark:text-gray-400">Last updated: {new Date(note.updatedAt).toLocaleString()}</p>
-      </header>
-      <div className="flex-1 p-6">
-        <textarea
-          value={content}
-          onChange={e => setContent(e.target.value)}
-          onBlur={handleBlur}
-          className="w-full h-full p-4 bg-transparent resize-none focus:outline-none text-charcoal-800 dark:text-gray-200 leading-relaxed"
-          placeholder="Start writing your note..."
-        />
-      </div>
-    </motion.div>
   );
 };
