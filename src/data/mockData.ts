@@ -1,4 +1,4 @@
-import { Project, TeamMember, Task, CalendarEvent, Client, IncomeTransaction, ExpenseTransaction, Invoice, InvoiceTemplate, Conversation, Note, ProjectFile } from '../types';
+import { Project, TeamMember, Task, CalendarEvent, Client, Transaction, Invoice, InvoiceTemplate, Conversation, Note, ProjectFile, Fund } from '../types';
 
 export const mockTeamMembers: TeamMember[] = [
   {
@@ -308,18 +308,34 @@ export const mockClients: Client[] = [
   }
 ];
 
-export const mockIncomeTransactions: IncomeTransaction[] = [
-  { id: 'inc-1', description: 'Project payment from Innovate Inc.', amount: 25000, sector: 'Web Development', fund: 'Main Account', date: '2025-02-15' },
-  { id: 'inc-2', description: 'QuantumLeap monthly retainer', amount: 7500, sector: 'Consulting', fund: 'Main Account', date: '2025-02-10' },
-  { id: 'inc-3', description: 'Artisan Goods branding deposit', amount: 5000, sector: 'Branding', fund: 'Tax Fund', date: '2025-02-05' },
+export const mockFunds: Fund[] = [
+    { id: 'fund-1', name: 'Main Account', balance: 125340.50 },
+    { id: 'fund-2', name: 'Tax Fund', balance: 32500.00 },
+    { id: 'fund-3', name: 'Savings', balance: 50000.00 },
 ];
 
-export const mockExpenseTransactions: ExpenseTransaction[] = [
-  { id: 'exp-1', description: 'Figma Subscription', amount: 600, category: 'Software', date: '2025-02-01' },
-  { id: 'exp-2', description: 'February Salaries', amount: 45000, category: 'Salaries', date: '2025-02-28' },
-  { id: 'exp-3', description: 'WeWork Office Space', amount: 3200, category: 'Utilities', date: '2025-02-01' },
-  { id: 'exp-4', description: 'Google Ads Campaign', amount: 1500, category: 'Marketing', date: '2025-02-20' },
+export const mockTransactions: Transaction[] = [
+  // December 2024
+  { id: 't1', type: 'income', description: 'Innovate Inc. - Project Final Payment', amount: 25000, category: 'Web Development', date: '2024-12-15', fundId: 'fund-1' },
+  { id: 't2', type: 'expense', description: 'December Salaries', amount: 45000, category: 'Salaries', date: '2024-12-28', fundId: 'fund-1' },
+  { id: 't3', type: 'expense', description: 'WeWork Office Space', amount: 3200, category: 'Utilities', date: '2024-12-01', fundId: 'fund-1' },
+  { id: 't4', type: 'income', description: 'QuantumLeap - Monthly Retainer', amount: 7500, category: 'Consulting', date: '2024-12-10', fundId: 'fund-1' },
+  
+  // January 2025
+  { id: 't5', type: 'income', description: 'Artisan Goods - Branding Deposit', amount: 5000, category: 'Branding', date: '2025-01-05', fundId: 'fund-2' },
+  { id: 't6', type: 'expense', description: 'Figma Subscription', amount: 600, category: 'Software', date: '2025-01-01', fundId: 'fund-1' },
+  { id: 't7', type: 'expense', description: 'January Salaries', amount: 45000, category: 'Salaries', date: '2025-01-28', fundId: 'fund-1' },
+  { id: 't8', type: 'income', description: 'HealthPlus - Milestone 1', amount: 40000, category: 'Web Development', date: '2025-01-20', fundId: 'fund-1' },
+  { id: 't9', type: 'expense', description: 'Google Ads Campaign', amount: 1500, category: 'Marketing', date: '2025-01-15', fundId: 'fund-1' },
+
+  // February 2025
+  { id: 't10', type: 'expense', description: 'February Salaries', amount: 48000, category: 'Salaries', date: '2025-02-28', fundId: 'fund-1' },
+  { id: 't11', type: 'income', description: 'QuantumLeap - Monthly Retainer', amount: 7500, category: 'Consulting', date: '2025-02-10', fundId: 'fund-1' },
+  { id: 't12', type: 'income', description: 'Innovate Inc. - SEO Retainer', amount: 4000, category: 'SEO', date: '2025-02-18', fundId: 'fund-1' },
+  { id: 't13', type: 'expense', description: 'Stock Photos Subscription', amount: 250, category: 'Software', date: '2025-02-05', fundId: 'fund-1' },
+  { id: 't14', type: 'expense', description: 'Client Lunch - HealthPlus', amount: 350, category: 'Other', date: '2025-02-22', fundId: 'fund-1' },
 ];
+
 
 export const mockInvoiceTemplates: InvoiceTemplate[] = [
   {

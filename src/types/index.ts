@@ -83,21 +83,20 @@ export interface CalendarEvent {
   projectId?: string;
 }
 
-export interface IncomeTransaction {
-  id: string;
-  description: string;
-  amount: number;
-  sector: 'Web Development' | 'Branding' | 'Consulting' | 'Other';
-  fund: 'Main Account' | 'Tax Fund' | 'Savings';
-  date: string;
+export interface Fund {
+    id: string;
+    name: string;
+    balance: number;
 }
 
-export interface ExpenseTransaction {
+export interface Transaction {
   id: string;
   description: string;
   amount: number;
-  category: 'Software' | 'Salaries' | 'Utilities' | 'Marketing' | 'Other';
   date: string;
+  type: 'income' | 'expense';
+  category: string; // e.g., 'Web Development', 'Branding', 'Software', 'Salaries'
+  fundId: string;
 }
 
 export interface InvoiceLineItem {
