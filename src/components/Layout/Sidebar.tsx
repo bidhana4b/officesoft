@@ -13,7 +13,8 @@ import {
   ChevronLeft,
   Landmark,
   Receipt,
-  LayoutTemplate
+  LayoutTemplate,
+  Megaphone
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -32,6 +33,7 @@ const navigationItems = [
   { id: 'finance', label: 'Finance', icon: Landmark },
   { id: 'invoicing', label: 'Invoicing', icon: Receipt },
   { id: 'invoice-templates', label: 'Invoice Templates', icon: LayoutTemplate },
+  { id: 'ad-management', label: 'Ad Management', icon: Megaphone },
   { id: 'chat', label: 'Chat & Notes', icon: MessageSquare },
   { id: 'files', label: 'Files', icon: FileText },
   { id: 'calendar', label: 'Calendar', icon: Calendar },

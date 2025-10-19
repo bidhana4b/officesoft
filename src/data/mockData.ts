@@ -1,4 +1,5 @@
-import { Project, TeamMember, Task, CalendarEvent, Client, Transaction, Invoice, InvoiceTemplate, Conversation, Note, ProjectFile, Fund } from '../types';
+import { Project, TeamMember, Task, CalendarEvent, Client, Transaction, Invoice, InvoiceTemplate, Conversation, Note, ProjectFile, Fund, AdPlatform, AdAccount, Campaign, ClientAdTransaction } from '../types';
+import { Facebook, Chrome } from 'lucide-react';
 
 export const mockTeamMembers: TeamMember[] = [
   {
@@ -9,7 +10,8 @@ export const mockTeamMembers: TeamMember[] = [
     email: 'sarah@studio.com',
     phone: '555-0101',
     status: 'online',
-    department: 'Design'
+    department: 'Management',
+    userRole: 'admin',
   },
   {
     id: '2',
@@ -19,7 +21,8 @@ export const mockTeamMembers: TeamMember[] = [
     email: 'marcus@studio.com',
     phone: '555-0102',
     status: 'online',
-    department: 'Development'
+    department: 'Development',
+    userRole: 'ad_manager',
   },
   {
     id: '3',
@@ -29,7 +32,8 @@ export const mockTeamMembers: TeamMember[] = [
     email: 'emma@studio.com',
     phone: '555-0103',
     status: 'away',
-    department: 'Design'
+    department: 'Design',
+    userRole: 'client_manager',
   },
   {
     id: '4',
@@ -39,7 +43,8 @@ export const mockTeamMembers: TeamMember[] = [
     email: 'james@studio.com',
     phone: '555-0104',
     status: 'online',
-    department: 'Management'
+    department: 'Management',
+    userRole: 'client_manager',
   },
   {
     id: '5',
@@ -49,7 +54,8 @@ export const mockTeamMembers: TeamMember[] = [
     email: 'olivia@studio.com',
     phone: '555-0105',
     status: 'online',
-    department: 'Design'
+    department: 'Design',
+    userRole: 'ad_manager',
   },
   {
     id: '6',
@@ -59,7 +65,8 @@ export const mockTeamMembers: TeamMember[] = [
     email: 'david@studio.com',
     phone: '555-0106',
     status: 'away',
-    department: 'Development'
+    department: 'Development',
+    userRole: 'ad_manager',
   },
   {
     id: '7',
@@ -69,7 +76,8 @@ export const mockTeamMembers: TeamMember[] = [
     email: 'lisa@studio.com',
     phone: '555-0107',
     status: 'online',
-    department: 'Design'
+    department: 'Design',
+    userRole: 'client_manager',
   },
   {
     id: '8',
@@ -79,7 +87,8 @@ export const mockTeamMembers: TeamMember[] = [
     email: 'alex@studio.com',
     phone: '555-0108',
     status: 'offline',
-    department: 'Development'
+    department: 'Development',
+    userRole: 'ad_manager',
   }
 ];
 
@@ -256,7 +265,9 @@ export const mockClients: Client[] = [
     status: 'active',
     activeProjects: 3,
     totalBilled: 150000,
-    services: ['Branding', 'Web Dev', 'SEO']
+    services: ['Branding', 'Web Dev', 'SEO'],
+    adBalanceUSD: 1250.50,
+    avgDepositRate: 150,
   },
   {
     id: '2',
@@ -268,7 +279,9 @@ export const mockClients: Client[] = [
     status: 'active',
     activeProjects: 2,
     totalBilled: 95000,
-    services: ['Mobile App', 'UX/UI Design']
+    services: ['Mobile App', 'UX/UI Design'],
+    adBalanceUSD: 345.00,
+    avgDepositRate: 152.5,
   },
   {
     id: '3',
@@ -280,7 +293,9 @@ export const mockClients: Client[] = [
     status: 'onboarding',
     activeProjects: 1,
     totalBilled: 10000,
-    services: ['E-commerce', 'Photography']
+    services: ['E-commerce', 'Photography'],
+    adBalanceUSD: 0,
+    avgDepositRate: 148,
   },
   {
     id: '4',
@@ -292,7 +307,9 @@ export const mockClients: Client[] = [
     status: 'active',
     activeProjects: 4,
     totalBilled: 220000,
-    services: ['Web Dev', 'Content Strategy']
+    services: ['Web Dev', 'Content Strategy'],
+    adBalanceUSD: -50.20, // Dues
+    avgDepositRate: 149.8,
   },
   {
     id: '5',
@@ -304,7 +321,8 @@ export const mockClients: Client[] = [
     status: 'churned',
     activeProjects: 0,
     totalBilled: 80000,
-    services: ['Consulting']
+    services: ['Consulting'],
+    adBalanceUSD: 0,
   }
 ];
 
@@ -511,4 +529,86 @@ export const mockFiles: ProjectFile[] = [
     version: 1,
     projectId: '3'
   }
+];
+
+// --- Mock Data for Ad Management System ---
+
+export const mockAdPlatforms: AdPlatform[] = [
+    { id: 'facebook', name: 'Facebook', icon: Facebook },
+    { id: 'google', name: 'Google', icon: Chrome },
+];
+
+export const mockAdAccounts: AdAccount[] = [
+    { id: 'ad-acct-1', name: 'FB Main Acct', platformId: 'facebook', balanceUSD: 4500.75, avgCostPerUSD: 130.50 },
+    { id: 'ad-acct-2', name: 'Google Ads Primary', platformId: 'google', balanceUSD: 8210.20, avgCostPerUSD: 128.75 },
+    { id: 'ad-acct-3', name: 'FB Backup Acct', platformId: 'facebook', balanceUSD: 950.00, avgCostPerUSD: 132.00 },
+];
+
+export const mockCampaigns: Campaign[] = [
+    {
+        id: 'camp-1',
+        name: 'Innovate Inc. - Q1 Lead Gen',
+        clientId: '1',
+        platformId: 'facebook',
+        status: 'completed',
+        requestedById: '4', // James Wilson
+        assignedToId: '2', // Marcus Rodriguez
+        budgetUSD: 500,
+        actualSpendUSD: 480.25,
+        adAccountId: 'ad-acct-1',
+        audienceDetails: 'Tech CEOs in North America, aged 35-55',
+        reportUrl: '#',
+        createdAt: '2025-01-15',
+        completedAt: '2025-01-30',
+        profit: (480.25 * 150) - (480.25 * 130.50), // 9364.875
+    },
+    {
+        id: 'camp-2',
+        name: 'QuantumLeap - App Install Campaign',
+        clientId: '2',
+        platformId: 'google',
+        status: 'running',
+        requestedById: '3', // Emma Thompson
+        assignedToId: '5', // Olivia Martinez
+        budgetUSD: 1000,
+        adAccountId: 'ad-acct-2',
+        audienceDetails: 'Android users in USA, interested in finance apps',
+        createdAt: '2025-02-10',
+    },
+    {
+        id: 'camp-3',
+        name: 'HealthPlus - Local Awareness',
+        clientId: '4',
+        platformId: 'facebook',
+        status: 'pending',
+        requestedById: '4', // James Wilson
+        budgetUSD: 300,
+        audienceDetails: 'Adults within 10 miles of clinic locations',
+        createdAt: '2025-03-01',
+    },
+    {
+        id: 'camp-4',
+        name: 'Innovate Inc. - Retargeting',
+        clientId: '1',
+        platformId: 'google',
+        status: 'completed',
+        requestedById: '3', // Emma Thompson
+        assignedToId: '2', // Marcus Rodriguez
+        budgetUSD: 250,
+        actualSpendUSD: 255.10, // Overspent
+        adAccountId: 'ad-acct-2',
+        audienceDetails: 'Website visitors from the last 30 days',
+        reportUrl: '#',
+        createdAt: '2025-02-20',
+        completedAt: '2025-03-05',
+        profit: (255.10 * 150) - (255.10 * 128.75), // 5422.125
+    }
+];
+
+export const mockClientAdTransactions: ClientAdTransaction[] = [
+    { id: 'cat-1', clientId: '1', type: 'deposit', amountBDT: 300000, amountUSD: 2000, ratePerUSD: 150, transactionDate: '2025-01-10' },
+    { id: 'cat-2', clientId: '2', type: 'deposit', amountBDT: 76250, amountUSD: 500, ratePerUSD: 152.5, transactionDate: '2025-02-08' },
+    { id: 'cat-3', clientId: '1', type: 'spend', amountUSD: 480.25, transactionDate: '2025-01-30', campaignId: 'camp-1' },
+    { id: 'cat-4', clientId: '4', type: 'deposit', amountBDT: 14980, amountUSD: 100, ratePerUSD: 149.8, transactionDate: '2025-02-25' },
+    { id: 'cat-5', clientId: '1', type: 'spend', amountUSD: 255.10, transactionDate: '2025-03-05', campaignId: 'camp-4' },
 ];

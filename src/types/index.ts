@@ -34,6 +34,7 @@ export interface TeamMember {
   phone?: string;
   status: 'online' | 'offline' | 'away';
   department: string;
+  userRole: 'admin' | 'client_manager' | 'ad_manager';
 }
 
 export interface Client {
@@ -50,6 +51,9 @@ export interface Client {
   activeProjects: number;
   totalBilled: number;
   services: string[];
+  // For Ad Management
+  adBalanceUSD?: number;
+  avgDepositRate?: number; // BDT per USD
 }
 
 export interface Comment {
@@ -146,3 +150,57 @@ export interface Note {
   content: string;
   updatedAt: string;
 }
+
+// --- Ad Management System Types ---
+
+export type AdPlatform = {
+  id: 'facebook' | 'google' | 'tiktok';
+  name: string;
+  icon: React.ComponentType<any>;
+};
+
+export type AdAccount = {
+  id: string;
+  name: string;
+  platformId: AdPlatform['id'];
+  balanceUSD: number;
+  avgCostPerUSD: number; // Average BDT cost to acquire 1 USD in this account
+};
+
+export type AdAccountRecharge = {
+  id: string;
+  adAccountId: string;
+  amountUSD: number;
+  costBDT: number;
+  ratePerUSD: number;
+  rechargeDate: string;
+};
+
+export type ClientAdTransaction = {
+  id: string;
+  clientId: string;
+  type: 'deposit' | 'spend';
+  amountBDT?: number; // Only for deposits
+  amountUSD: number;
+  ratePerUSD?: number; // Only for deposits
+  transactionDate: string;
+  campaignId?: string; // For spend transactions
+};
+
+export type Campaign = {
+  id: string;
+  name: string;
+  clientId: string;
+  platformId: AdPlatform['id'];
+  status: 'pending' | 'running' | 'completed' | 'cancelled';
+  requestedById: string; // User ID of Client Manager
+  assignedToId?: string; // User ID of Ad Manager
+  budgetUSD: number;
+  actualSpendUSD?: number;
+  adAccountId?: string;
+  audienceDetails: string;
+  reportUrl?: string; // Link to screenshot/report
+  createdAt: string;
+  completedAt?: string;
+  profit?: number; // BDT
+};

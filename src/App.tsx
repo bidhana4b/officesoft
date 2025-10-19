@@ -15,6 +15,7 @@ import { ChatView } from './components/Chat/ChatView';
 import { CalendarView } from './components/Calendar/CalendarView';
 import { FilesView } from './components/Files/FilesView';
 import { SettingsView } from './components/Settings/SettingsView';
+import { AdManagerView } from './components/AdManager/AdManagerView';
 import { ProjectFormModal } from './components/Projects/ProjectFormModal';
 import { TaskFormModal } from './components/Tasks/TaskFormModal';
 import { TeamMemberFormModal } from './components/Team/TeamMemberFormModal';
@@ -122,6 +123,7 @@ const App: React.FC = () => {
       case 'finance': return <FinanceView />;
       case 'invoicing': return <InvoicingView />;
       case 'invoice-templates': return <InvoiceTemplatesView />;
+      case 'ad-management': return <AdManagerView />;
       case 'settings': return <SettingsView currentUser={currentUser} onUpdateUser={handleUpdateCurrentUser} />;
       default: return <Dashboard projects={projects} tasks={tasks} />;
     }
